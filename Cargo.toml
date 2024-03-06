@@ -3,7 +3,7 @@ name = "julia-set"    # Название программы
 version = "0.1.0"     # Версия программы
 
 build = "build.rs"    # Скрипт для сборки rust
-links = "cudart"      # Библиотека cuda, которая линкуется динамически
+links = "cudart"      # Библиотека cuda_dot, которая линкуется динамически
 
 [dependencies]
 libc = "0.2.142"      # Библиотека rust для работы С кодом

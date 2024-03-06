@@ -1,47 +1,49 @@
+
 extern crate libc;
 extern crate rand;
 
-use std::ops::RangeInclusive;
-use libc::{c_float, size_t};
+use libc::{c_float, c_uchar, size_t};
 use rand::Rng;
 
-const VEC_SIZE: usize = 10;
-const MAX: f32 = 10.;
-const MIN: f32 = 0.;
+const SIZE: usize = 5_000;
 
 
 extern "C" {
-    fn dot(v1: *mut c_float, v2: *mut c_float, N: size_t) -> c_float;
-}
+    fn cudaMalloc(ptr: &mut *mut c_float, len: size_t);
 
-fn cpu_dot(v1: Vec<f32>, v2: Vec<f32>) -> f32 {
-    let mut res: f32 = 0.;
-    for i in 0..v1.len() {
-        res += v1[i] * v2[i];
-    }
-    return res;
+    fn dot(source: *mut c_float, dev: *mut c_float, count: size_t);
+    fn dot2();
+
+    fn dot__(dev: *mut c_float);
 }
 
 fn main() {
-    let mut v1: Vec<f32> = Vec::new();
-    let mut v2: Vec<f32> = Vec::new();
+    let mut v: Vec<f32> = Vec::with_capacity(SIZE);
 
     let mut rng = rand::thread_rng();
-    for _ in 0..VEC_SIZE {
-        v1.push(rng.gen_range(RangeInclusive::new(MIN, MAX)));
-        v2.push(rng.gen_range(RangeInclusive::new(MIN, MAX)));
+    for _ in 0..SIZE {
+        //v.push(rng.gen_range(0. ..1.));
+        v.push(0.0);
     }
 
-    println!("{:?}", v1);
-    println!("{:?}", v2);
+    let s = std::mem::size_of::<c_float>();
+    println!("{}", s);
 
+    // // Размер изображения
+    // let bounds = (1000, 1000);
+    // // Изображение в памяти компьютера
+    // let mut pixels = vec![0, bounds.0 * bounds.1];
+    // // Указатель на тип данных uchar в памяти GPU
+    // let gpu_bitmap: *mut c_uchar;
+
+    let mut gpu_float: *mut c_float = std::ptr::null_mut();
     unsafe {
-        println!("GPU computing started");
-        let gpu_res = dot(v1.as_mut_ptr(), v2.as_mut_ptr(), VEC_SIZE);
-        println!("GPU computing finished");
-        println!("GPU dot product result: {}", gpu_res);
-    }
+        cudaMalloc(&mut gpu_float, s * SIZE);
 
-    let cpu_res = cpu_dot(v1, v2);
-    println!("CPU dot product result: {}", cpu_res);
+        dot2();
+
+        dot(v.as_mut_ptr(), gpu_float, SIZE);
+
+        dot__(gpu_float);
+    }
 }
