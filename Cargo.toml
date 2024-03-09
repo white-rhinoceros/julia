@@ -1,13 +1,20 @@
 [package]
-name = "julia-set"    # Название программы
-version = "0.1.0"     # Версия программы
+name = "julia"
+version = "0.1.0"
 
-build = "build.rs"    # Скрипт для сборки rust
-links = "cudart"      # Библиотека cuda_dot, которая линкуется динамически
+build = "build.rs"
+links = "cudart"
+
+[lib]
+name = "julia"
+path = "src/lib.rs"
 
 [dependencies]
-libc = "0.2.142"      # Библиотека rust для работы С кодом
-rand = "0.8.5"        # Библиотека rust для работы с случайными величинами
+# Библиотека rust для работы С кодом
+libc = "0.2.153"
+# Крейт для работы с изображениями
+image = "0.24.9"
 
 [build-dependencies]
-cc = "1.0.79"         # Rust пакет для сборки С кода
+# Rust пакет для сборки С кода
+cc = "1.0.89"
